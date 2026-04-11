@@ -20,6 +20,7 @@
 最低要求如下：
 
 - 功能变更先更新 `README.md`
+- 架构或模块分层调整先更新 `docs/achitecture.md`
 - Google Maps 相关变更同步更新 `docs/google-maps-setup.md`
 - 协作流程或结构规范改变时更新 `AGENTS.md`
 
@@ -158,7 +159,22 @@
 - `.env.example` 必须提交
 - 新增环境变量时，README 与相关文档必须同步更新
 
-## 8. Google Maps Rules
+## 8. Documentation Directory Rules
+
+`docs/` 文件夹专门用于项目文档。
+
+必须维护的核心文件：
+
+- `docs/achitecture.md`: 本项目架构主文档
+- `docs/google-maps-setup.md`: Google Maps API 开通与整合说明
+
+规则：
+
+- 架构、模块边界、资料流、前后端职责变动时，先更新 `docs/achitecture.md`
+- Google Maps API 使用方式、启用项目、key 限制、监控方式变动时，先更新 `docs/google-maps-setup.md`
+- 不要把架构说明散落在多个无关文件，优先汇总在 `docs/achitecture.md`
+
+## 9. Google Maps Rules
 
 Google Maps 整合必须满足以下要求：
 
@@ -168,7 +184,7 @@ Google Maps 整合必须满足以下要求：
 - 必须设计 requests monitor，记录调用量、成功率、失败率、延迟与 quota 风险
 - 相关说明必须同步维护在 `docs/google-maps-setup.md`
 
-## 9. Development Order
+## 10. Development Order
 
 本项目开发顺序固定如下：
 
@@ -178,7 +194,7 @@ Google Maps 整合必须满足以下要求：
 
 不得跳过前端假资料阶段直接硬接后端，也不得在权限与验证未完成前视为后端完成。
 
-## 10. Testing and Acceptance
+## 11. Testing and Acceptance
 
 每个阶段都必须有可观察的验收结果。
 
@@ -199,7 +215,7 @@ Google Maps 整合必须满足以下要求：
 - 前端 Axios 请求与后端响应一致
 - 使用者只能操作自己的资料
 
-## 11. Change Management
+## 12. Change Management
 
 当出现以下变更时，必须同步更新文档后才可改代码：
 
@@ -211,7 +227,7 @@ Google Maps 整合必须满足以下要求：
 - 环境变量增减
 - 目录结构大幅调整
 
-## 12. Definition of Done
+## 13. Definition of Done
 
 功能完成前，至少需满足：
 
