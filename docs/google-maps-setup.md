@@ -105,7 +105,7 @@ Google Maps key 至少应做两层限制：应用限制与 API 限制。
 ### Frontend `.env`
 
 ```dotenv
-VITE_GOOGLE_MAPS_API_KEY=your_browser_key
+VITE_GOOGLE_MAPS_API_KEY=
 VITE_API_BASE_URL=http://localhost:3000
 ```
 
@@ -113,11 +113,11 @@ VITE_API_BASE_URL=http://localhost:3000
 
 ```dotenv
 PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/hikelog
-JWT_SECRET=change_me
+DATABASE_URL=
+JWT_SECRET=
 JWT_EXPIRES_IN=7d
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-GOOGLE_MAPS_API_KEY=your_server_key_if_needed
+GOOGLE_MAPS_API_KEY=
 ```
 
 规则：
@@ -125,6 +125,29 @@ GOOGLE_MAPS_API_KEY=your_server_key_if_needed
 - `.env` 不提交到版本控制
 - `.env.example` 提交并保留变量名称
 - 不要把 key 或 secret 写进源码
+- 第一阶段就先建立 `frontend/.env`、`frontend/.env.example`、`backend/.env`、`backend/.env.example`
+- `VITE_GOOGLE_MAPS_API_KEY` 留给浏览器端地图载入使用
+- `GOOGLE_MAPS_API_KEY` 先预留空位，后端未来真的需要直连 Google 服务时再填写
+
+### 推荐的 `.env.example` 内容
+
+前端：
+
+```dotenv
+VITE_GOOGLE_MAPS_API_KEY=
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+后端：
+
+```dotenv
+PORT=3000
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=7d
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+GOOGLE_MAPS_API_KEY=
+```
 
 ## 8. 前端如何载入 Google Maps JavaScript API
 
