@@ -34,7 +34,7 @@ docs/
 - `docs/achitecture.md`: 记录整体架构、模块职责、资料流、开发顺序
 - `docs/google-maps-setup.md`: 记录 Google Cloud、Billing、API 启用、API key 限制与整合说明
 
-第一阶段实际目录骨架建议同步建立为：
+第一阶段实际目录骨架建议同步建立为可运行的前端原型：
 
 ```text
 .
@@ -72,7 +72,7 @@ docs/
 
 ## 3. Frontend Architecture
 
-前端负责页面呈现、地图互动、表单输入、认证状态与 API 串接。
+前端负责页面呈现、地图互动、表单输入、认证状态与 API 串接。phase1 先完成前端可运行原型，不接真实后端，所有业务流程先通过 mock service 与本地存储驱动。
 
 建议目录：
 
@@ -102,6 +102,32 @@ frontend/
 - `services/`: Axios 实例与 API 封装
 - `types/`: 前后端 DTO 与 domain model
 - `utils/`: 日期、距离、地图资料转换等工具函数
+
+phase1 额外要求：
+
+- 建立 `Vite + React + TypeScript` 可运行工程与测试环境
+- 使用 `Material UI` 作为组件基础，但通过自订主题与视觉样式实现户外杂志风
+- `AuthContext` 先以 mock 用户和本地存储维持登录态
+- 路由保护集中在 `routes/`，页面不自行处理鉴权跳转
+- 地图脚本加载、Directions 请求与错误状态集中在 `hooks/` 或 `services/`
+- 页面组件只组合 UI、调用 hooks 与服务，不直接塞入复杂地图初始化逻辑
+- 记录新增与编辑只写入前端 mock data，后续才通过 Axios 串接后端
+
+phase1 页面与流程范围：
+
+- `/`: 首页与主要 CTA
+- `/login`: 登录页
+- `/register`: 注册页
+- `/map`: 地图规划与记录建立页
+- `/records`: 记录列表页
+- `/records/:id`: 记录详情页
+- `/records/:id/edit`: 记录编辑页
+
+phase1 路由规则：
+
+- `/map`、`/records`、`/records/:id`、`/records/:id/edit` 需要 mock 登录态
+- 未登录时统一跳转 `/login`
+- 已登录时访问 `/login` 或 `/register` 时导向 `/map`
 
 前端原则：
 
@@ -238,7 +264,7 @@ PORT=3000
 DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:4321,http://127.0.0.1:4321
 GOOGLE_MAPS_API_KEY=
 ```
 
@@ -257,6 +283,14 @@ Google Maps 在本项目中的角色如下：
 - `Directions API`: 徒步路线与里程计算
 - `Places API`: 可选，用于地点搜寻
 - `Geocoding API`: 可选，用于地址转换
+
+phase1 前端整合策略：
+
+- 浏览器端从 `frontend/.env` 读取 `VITE_GOOGLE_MAPS_API_KEY`
+- 使用独立 loader hook 避免脚本重复载入
+- 地图页提供起点、终点、路线摘要与记录表单
+- 若 key 缺失、API 加载失败或 Directions 失败，页面仍保留可操作的降级流程与错误提示
+- 预留 request monitor 的前端埋点接口，但 phase1 不接真实监控后台
 
 建议资料流：
 

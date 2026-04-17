@@ -9,10 +9,10 @@
 - `Maps JavaScript API`: 地图载入、缩放、拖拽、标记、互动
 - `Directions API`: 路线规划、距离计算、步行路线建议
 
-### Optional
+### Optional / Conditional
 
 - `Places API`: 搜寻地点、地点建议、Place ID
-- `Geocoding API`: 地址与经纬度互转
+- `Geocoding API`: 地址与经纬度互转；当前前端路线表单会先解析使用者输入的文字地址，因此此项目现阶段也需要启用
 
 本项目默认优先整合 `Directions API`，因为它最贴近徒步路线与里程纪录需求。
 
@@ -45,15 +45,23 @@
 
 前往 Google Cloud Console 的 `APIs & Services`，启用以下 API：
 
-### 必开
+### 基础必开
 
 - `Maps JavaScript API`
 - `Directions API`
 
+### 当前实现追加必开
+
+- `Geocoding API`
+
 ### 选开
 
 - `Places API`
-- `Geocoding API`
+
+补充说明：
+
+- 目前前端路线页面会先调用 `google.maps.Geocoder` 解析起点与终点，再调用 `DirectionsService` 生成步行路线，所以 `Geocoding API` 不是可选项。
+- 只有在未来改成直接提交经纬度或 place ID 给 Directions 时，才有机会移除 geocoding 依赖。
 
 参考文件：
 
@@ -79,13 +87,14 @@ Google Maps key 至少应做两层限制：应用限制与 API 限制。
 
 - Application restriction: `HTTP referrers (web sites)`
 - Allowed referrers:
-  - `http://localhost:5173/*`
-  - `http://127.0.0.1:5173/*`
+  - `http://localhost:4321/*`
+  - `http://127.0.0.1:4321/*`
   - 未来正式站点网域
 - API restrictions:
   - `Maps JavaScript API`
   - `Directions API`
-  - 若有用到再加入 `Places API`
+  - `Geocoding API`
+  - 若有地点搜寻建议，再加入 `Places API`
 
 ### 6.2 Backend Key
 
@@ -116,7 +125,7 @@ PORT=3000
 DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:4321,http://127.0.0.1:4321
 GOOGLE_MAPS_API_KEY=
 ```
 
@@ -126,8 +135,9 @@ GOOGLE_MAPS_API_KEY=
 - `.env.example` 提交并保留变量名称
 - 不要把 key 或 secret 写进源码
 - 第一阶段就先建立 `frontend/.env`、`frontend/.env.example`、`backend/.env`、`backend/.env.example`
-- `VITE_GOOGLE_MAPS_API_KEY` 留给浏览器端地图载入使用
+- `VITE_GOOGLE_MAPS_API_KEY` 供浏览器端载入 Maps JavaScript API，并用于当前前端触发 Directions 与 Geocoder 相关请求
 - `GOOGLE_MAPS_API_KEY` 先预留空位，后端未来真的需要直连 Google 服务时再填写
+- 当前实现不需要额外新增 `VITE_GOOGLE_GEOCODING_API_KEY` 之类的环境变量空位
 
 ### 推荐的 `.env.example` 内容
 
@@ -145,7 +155,7 @@ PORT=3000
 DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:4321,http://127.0.0.1:4321
 GOOGLE_MAPS_API_KEY=
 ```
 
@@ -165,6 +175,25 @@ GOOGLE_MAPS_API_KEY=
 - 使用 Google 提供的 JavaScript loader 套件管理动态载入
 
 对 React 项目而言，第二种方式通常更容易控制重复载入与错误处理。
+
+### 8.1 Phase 1 Frontend Loader Strategy
+
+phase1 前端原型建议采用以下做法：
+
+- 在 `hooks/` 中建立 `useGoogleMapsLoader`
+- 统一读取 `VITE_GOOGLE_MAPS_API_KEY`
+- 由 hook 负责脚本加载状态、重复加载保护与错误回传
+- 页面组件只消费 `isLoaded`、`loadError` 与 `google.maps` 相关实例
+- 地图无法载入时，保留降级 UI，不要让整页白屏
+- 当前路线生成流程同时依赖 `Geocoder` 与 `DirectionsService`，任一服务权限不足都应视为配置错误并直接回报
+
+建议同时建立 `useRoutePlanner` 或等价模块，统一管理：
+
+- 起点与终点输入
+- `DirectionsService` 步行路线请求
+- 距离与预计时间摘要
+- 路线请求错误处理
+- 后续 request monitor 埋点入口
 
 ## 9. Directions 在本项目中的用途
 

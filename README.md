@@ -38,6 +38,35 @@
 | Auth | JWT |
 | Password Hashing | bcrypt 或 argon2 |
 
+## 2.1 Local Run
+
+目前 phase1 已完成可运行的前端原型，后端仍处于骨架阶段。
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+默认开发地址为 `http://localhost:4321`。
+
+### Start All Services Script
+
+项目根目录提供 `./start_all_server.sh`：
+
+```bash
+./start_all_server.sh
+```
+
+脚本行为如下：
+
+- 自动启动 `frontend` 的 Vite 开发服务器
+- 若 `backend/package.json` 与可用启动脚本存在，则一并启动后端
+- 若后端尚未初始化，则显示提示并跳过后端，不影响前端启动
+- 按 `Ctrl+C` 时会一并关闭脚本启动的子进程
+
 ## 3. Functional Scope
 
 ### 3.1 Auth
@@ -78,7 +107,7 @@ docs/
 - `docs/achitecture.md` 作为本项目架构主文档
 - `docs/google-maps-setup.md` 作为 Google Maps API 开通与整合说明
 
-第一阶段先建立基础骨架，建议仓库目录如下：
+第一阶段先完成可运行的前端原型，先用 mock data 验证导航、地图互动与记录流程，再保留后续 Axios 对接空间。建议仓库目录如下：
 
 ```text
 .
@@ -181,7 +210,7 @@ backend/
 
 ## 5. Frontend Page Plan
 
-第一阶段先完成页面、导航与互动，不接真实后端，先使用假资料与 mock data。
+第一阶段先完成页面、导航与互动，不接真实后端，先使用假资料与 mock data，并建立可运行的 React + Vite 前端工程。
 
 | Page | Purpose | Phase 1 Acceptance |
 | --- | --- | --- |
@@ -192,6 +221,33 @@ backend/
 | `/records` | 我的路线或记录列表 | 能显示假资料并支援筛选或搜寻 |
 | `/records/:id` | 单笔详情页 | 可查看路线、日期、心得、地点等资料 |
 | `/records/:id/edit` | 编辑页 | 可载入假资料并完成编辑流程 |
+
+### 5.1 Phase 1 Frontend Prototype Rules
+
+本阶段前端实现需满足以下规则：
+
+- 使用 `React + TypeScript + Vite + React Router + Material UI`
+- 维持简中界面文案，技术字段保持英文命名
+- 使用 mock `AuthContext` 与 local storage/session storage 模拟登录状态
+- `/map`、`/records`、`/records/:id`、`/records/:id/edit` 需受保护
+- 未登录访问受保护页时跳转 `/login`
+- 登录后访问 `/login` 或 `/register` 时默认导向 `/map`
+- 保留 `services/` 作为未来 Axios API 对接边界，本阶段先由 mock service 回传资料
+- `Google Maps JavaScript API` 由浏览器端 `VITE_GOOGLE_MAPS_API_KEY` 载入
+- `Directions API` 负责步行路线、距离与预计时间展示
+- 当前路线表单会先用 geocoding 解析起终点，因此 `Geocoding API` 也必须启用
+- 若地图 key 缺失或加载失败，页面仍需显示非阻断式降级提示与 mock 记录流程
+
+### 5.2 Phase 1 Navigation Flow
+
+建议的前端导览流程如下：
+
+1. 访客由首页进入登录或注册页。
+2. 登录成功后进入地图页，输入起点与终点并规划步行路线。
+3. 使用者填写路线标题、分类、完成日期与心得，并保存为 mock 记录。
+4. 记录列表页可按关键字与分类筛选。
+5. 详情页可查看路线摘要与记录内容。
+6. 编辑页可更新 mock 记录并回写前端状态。
 
 ## 6. RESTful API Design
 
@@ -218,6 +274,12 @@ backend/
 - `GET /api/events/:id/route`
 - `POST /api/locations/search`
 - `POST /api/events/:id/recalculate-distance`
+
+前端 phase1 会先以 mock service 提供以下等价接口边界，后续可平滑切换到真实后端：
+
+- `authService.login/register/logout/getCurrentUser`
+- `recordService.listRecords/getRecordById/createRecord/updateRecord`
+- `mapService.searchPlace/getWalkingRoute`
 
 ## 7. Common Data Fields
 
@@ -400,8 +462,8 @@ GET /api/posts?q=sunrise&category=trail
 
 后端需允许至少以下来源：
 
-- `http://localhost:5173`
-- `http://127.0.0.1:5173`
+- `http://localhost:4321`
+- `http://127.0.0.1:4321`
 
 ### 12.2 Environment Variable Policy
 
@@ -414,7 +476,7 @@ GET /api/posts?q=sunrise&category=trail
 
 | Variable | Layer | Purpose |
 | --- | --- | --- |
-| `VITE_GOOGLE_MAPS_API_KEY` | Frontend | Google Maps JavaScript API key |
+| `VITE_GOOGLE_MAPS_API_KEY` | Frontend | 浏览器端 Google Maps key，供 Maps JavaScript API、Directions 与 Geocoding 使用 |
 | `VITE_API_BASE_URL` | Frontend | 后端 API base URL |
 | `PORT` | Backend | Express port |
 | `DATABASE_URL` | Backend | PostgreSQL connection string |
@@ -439,13 +501,14 @@ PORT=3000
 DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:4321,http://127.0.0.1:4321
 GOOGLE_MAPS_API_KEY=
 ```
 
 说明：
 
 - `VITE_GOOGLE_MAPS_API_KEY` 给前端浏览器端 Google Maps JavaScript API 使用
+- 当前实现不需要额外新增 geocoding 专用 env 变量；请直接让这把浏览器端 key 同时启用 `Geocoding API` 并加入本地开发 referrer
 - `GOOGLE_MAPS_API_KEY` 预留给后端未来直接调用 Google Maps web services 使用
 - 真实值只填写在 `.env`，`.env.example` 保留空白或安全示例值即可
 
