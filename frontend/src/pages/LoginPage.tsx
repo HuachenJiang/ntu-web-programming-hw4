@@ -43,12 +43,11 @@ export function LoginPage() {
       <Grid item xs={12} md={6}>
         <Stack spacing={2.5} className="float-in">
           <Typography variant="overline" color="secondary.main" fontWeight={700}>
-            Demo Access
+            Trail Access
           </Typography>
-          <Typography variant="h2">用一套 mock 登录态，把地图流程完整跑一遍。</Typography>
+          <Typography variant="h2">登录后进入地图页，开始建立真实徒步记录。</Typography>
           <Typography color="text.secondary" lineHeight={1.8}>
-            phase1 先验证页面与导航，再在 phase2 接上 JWT 与后端 API。你现在可以直接用示例账号登录，体验路线规划、
-            记录新增、列表浏览和编辑流程。
+            登录成功后，系统会以 JWT 恢复你的身份，并统一从后端读取与保存记录资料。
           </Typography>
           <Box
             sx={{
@@ -61,8 +60,8 @@ export function LoginPage() {
             <Stack direction="row" spacing={1.5} alignItems="center">
               <DirectionsWalkRoundedIcon color="secondary" />
               <div>
-                <Typography fontWeight={700}>示例账号</Typography>
-                <Typography color="text.secondary">demo@hikelog.test / trail123</Typography>
+                <Typography fontWeight={700}>统一运行模式</Typography>
+                <Typography color="text.secondary">登录、地图、记录列表、详情与编辑全部接到真实后端。</Typography>
               </div>
             </Stack>
           </Box>

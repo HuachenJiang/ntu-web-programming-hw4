@@ -8,3 +8,12 @@ export interface ApiResponse<T> {
     total?: number;
   };
 }
+
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+  errors?: Array<{
+    field?: string;
+    message: string;
+  }>;
+}

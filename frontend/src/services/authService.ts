@@ -1,83 +1,104 @@
 import type { ApiResponse } from '../types/api';
-import type { AuthCredentials, RegisterPayload } from '../types/auth';
+import type { AuthCredentials, AuthSuccessData, RegisterPayload } from '../types/auth';
 import type { User } from '../types/models';
-import { createId } from '../utils/id';
-import { demoUsers, type MockStoredUser } from './mockData';
-import { readStorage, storageKeys, writeStorage } from './storage';
+import { apiClient } from './apiClient';
+import { readStorage, removeStorage, storageKeys, writeStorage } from './storage';
 
-function readUsers() {
-  const storedUsers = readStorage<MockStoredUser[]>(storageKeys.users, demoUsers);
-
-  if (!storedUsers.length) {
-    writeStorage(storageKeys.users, demoUsers);
-    return demoUsers;
-  }
-
-  return storedUsers;
+function persistAuth(data: AuthSuccessData) {
+  writeStorage(storageKeys.authToken, data.token);
+  writeStorage(storageKeys.authUser, data.user);
 }
 
-function sanitizeUser(user: MockStoredUser): User {
-  const { password: _password, ...safeUser } = user;
-  return safeUser;
+function clearAuth() {
+  removeStorage(storageKeys.authToken);
+  removeStorage(storageKeys.authUser);
+}
+
+function getStoredToken() {
+  return readStorage<string | null>(storageKeys.authToken, null);
+}
+
+function getStoredUser() {
+  const token = getStoredToken();
+  return token ? readStorage<User | null>(storageKeys.authUser, null) : null;
 }
 
 export const authService = {
   getCurrentUser(): User | null {
-    return readStorage<User | null>(storageKeys.authUser, null);
+    return getStoredUser();
+  },
+
+  getToken(): string | null {
+    return getStoredToken();
+  },
+
+  async restoreSession(): Promise<User | null> {
+    const token = getStoredToken();
+
+    if (!token) {
+      clearAuth();
+      return null;
+    }
+
+    try {
+      const response = await apiClient.request<User>('/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      writeStorage(storageKeys.authUser, response.data);
+      return response.data;
+    } catch {
+      clearAuth();
+      return null;
+    }
   },
 
   async login(payload: AuthCredentials): Promise<ApiResponse<User>> {
-    const user = readUsers().find(
-      (item) =>
-        item.email.toLowerCase() === payload.email.toLowerCase() && item.password === payload.password,
-    );
+    const response = await apiClient.request<AuthSuccessData>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
 
-    if (!user) {
-      throw new Error('邮箱或密码不正确，可使用 demo@hikelog.test / trail123');
-    }
-
-    const safeUser = sanitizeUser(user);
-    writeStorage(storageKeys.authUser, safeUser);
+    persistAuth(response.data);
 
     return {
       success: true,
-      message: '登录成功',
-      data: safeUser,
+      message: response.message,
+      data: response.data.user,
     };
   },
 
   async register(payload: RegisterPayload): Promise<ApiResponse<User>> {
-    const users = readUsers();
-    const exists = users.some((item) => item.email.toLowerCase() === payload.email.toLowerCase());
+    const response = await apiClient.request<AuthSuccessData>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
 
-    if (exists) {
-      throw new Error('这个邮箱已经注册过了');
-    }
-
-    const user: MockStoredUser = {
-      id: createId('user'),
-      name: payload.name,
-      email: payload.email,
-      password: payload.password,
-    };
-
-    const nextUsers = [...users, user];
-    writeStorage(storageKeys.users, nextUsers);
-    const safeUser = sanitizeUser(user);
-    writeStorage(storageKeys.authUser, safeUser);
+    persistAuth(response.data);
 
     return {
       success: true,
-      message: '注册成功',
-      data: safeUser,
+      message: response.message,
+      data: response.data.user,
     };
   },
 
-  logout() {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  async logout() {
+    const token = getStoredToken();
 
-    window.localStorage.removeItem(storageKeys.authUser);
+    try {
+      if (token) {
+        await apiClient.request<null>('/auth/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } finally {
+      clearAuth();
+    }
   },
 };

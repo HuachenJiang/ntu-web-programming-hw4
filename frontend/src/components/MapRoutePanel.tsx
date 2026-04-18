@@ -21,7 +21,6 @@ interface MapRoutePanelProps {
   onOriginChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onPlanRoute: () => void;
-  onUseDemoRoute: () => void;
   routePlan: RoutePlan | null;
   routeError: string | null;
   loadError: string | null;
@@ -34,7 +33,6 @@ export function MapRoutePanel({
   onOriginChange,
   onDestinationChange,
   onPlanRoute,
-  onUseDemoRoute,
   routePlan,
   routeError,
   loadError,
@@ -62,11 +60,11 @@ export function MapRoutePanel({
             </Typography>
             <Typography variant="h4">规划这次徒步的起终点</Typography>
             <Typography color="text.secondary">
-              使用真实 Google Maps 规划步行路线，若 key 缺失则可切换示例路线继续验收页面流程。
+              使用真实 Google Maps 规划步行路线。只有成功取得真实路线后，才能保存这次徒步记录。
             </Typography>
           </Stack>
 
-          {loadError && <Alert severity="warning">{loadError}</Alert>}
+          {loadError && <Alert severity="error">{loadError}</Alert>}
           {routeError && <Alert severity="error">{routeError}</Alert>}
 
           <TextField label="起点" value={origin} onChange={(event) => onOriginChange(event.target.value)} />
@@ -76,11 +74,8 @@ export function MapRoutePanel({
             onChange={(event) => onDestinationChange(event.target.value)}
           />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button variant="contained" onClick={onPlanRoute} disabled={isPlanning}>
+            <Button variant="contained" onClick={onPlanRoute} disabled={isPlanning || Boolean(loadError)}>
               {isPlanning ? '规划中...' : '生成步行路线'}
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={onUseDemoRoute}>
-              使用示例路线
             </Button>
           </Stack>
 
@@ -98,8 +93,7 @@ export function MapRoutePanel({
                 ))}
               </Stack>
               <Typography variant="body2" color="text.secondary">
-                从 {routePlan.origin.label} 出发，步行至 {routePlan.destination.label}。这段路线适合作为
-                phase1 的真实地图交互演示。
+                从 {routePlan.origin.label} 出发，步行至 {routePlan.destination.label}。系统将把这段真实路线摘要写入记录资料。
               </Typography>
             </Stack>
           )}

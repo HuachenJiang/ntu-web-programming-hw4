@@ -9,6 +9,7 @@ interface RecordEditorFormProps {
   onChange: <K extends keyof RecordDraft>(field: K, value: RecordDraft[K]) => void;
   onSubmit: () => void;
   isSubmitting?: boolean;
+  isDisabled?: boolean;
 }
 
 export function RecordEditorForm({
@@ -18,6 +19,7 @@ export function RecordEditorForm({
   onChange,
   onSubmit,
   isSubmitting,
+  isDisabled,
 }: RecordEditorFormProps) {
   return (
     <Card className="grain-shell">
@@ -83,7 +85,7 @@ export function RecordEditorForm({
             error={Boolean(errors.notes)}
             helperText={errors.notes}
           />
-          <Button variant="contained" color="secondary" onClick={onSubmit} disabled={isSubmitting}>
+          <Button variant="contained" color="secondary" onClick={onSubmit} disabled={isSubmitting || isDisabled}>
             {isSubmitting ? '处理中...' : submitLabel}
           </Button>
         </Stack>

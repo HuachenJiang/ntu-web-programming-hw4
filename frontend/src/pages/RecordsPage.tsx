@@ -22,7 +22,7 @@ export function RecordsPage() {
     }
 
     recordService
-      .listRecords(user.id, {
+      .listRecords({
         ...filters,
         q: deferredQuery,
       })
@@ -40,7 +40,7 @@ export function RecordsPage() {
       <SectionIntro
         eyebrow="Archive"
         title="把每次徒步都整理成可回看的路线档案。"
-        description="这里的记录列表由 mock service 驱动，已经支持关键字搜索、分类筛选、详情查看与编辑跳转。后续只要替换 service，即可连接真实后端。"
+        description="这里的记录列表直接读取真实后端资料，并支援关键字搜索、分类筛选、详情查看与编辑跳转。"
       />
       <RecordFiltersPanel
         filters={filters}

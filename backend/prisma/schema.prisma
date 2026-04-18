@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventCategory {
+  ridge
+  forest
+  coast
+  urban
+}
+
+enum EventStatus {
+  planned
+  completed
+  canceled
+}
+
+enum LocationCategory {
+  trailhead
+  viewpoint
+  checkpoint
+  destination
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  locations    Location[]
+  events       Event[]
+  posts        Post[]
+
+  @@map("users")
+}
+
+model Location {
+  id          String           @id @default(uuid())
+  ownerId     String           @map("owner_id")
+  name        String
+  description String?
+  address     String
+  latitude    Float
+  longitude   Float
+  category    LocationCategory
+  placeId     String?          @map("place_id")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  owner       User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  events      Event[]
+
+  @@index([ownerId])
+  @@index([category])
+  @@map("locations")
+}
+
+model Event {
+  id              String        @id @default(uuid())
+  ownerId         String        @map("owner_id")
+  locationId      String        @map("location_id")
+  title           String
+  description     String?
+  category        EventCategory
+  status          EventStatus
+  completedDate   DateTime      @db.Date @map("completed_date")
+  distanceKm      Float         @map("distance_km")
+  durationMinutes Int           @map("duration_minutes")
+  notes           String
+  routePlanJson   Json          @map("route_plan_json")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  owner           User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  location        Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  posts           Post[]
+
+  @@index([ownerId])
+  @@index([locationId])
+  @@index([category])
+  @@index([completedDate])
+  @@map("events")
+}
+
+model Post {
+  id            String   @id @default(uuid())
+  ownerId       String   @map("owner_id")
+  eventId       String   @map("event_id")
+  title         String
+  description   String?
+  content       String
+  completedDate DateTime @db.Date @map("completed_date")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([eventId])
+  @@index([completedDate])
+  @@map("posts")
+}

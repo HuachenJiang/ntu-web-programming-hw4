@@ -31,8 +31,8 @@ const featureCards = [
     icon: <CameraAltOutlinedIcon />,
   },
   {
-    title: '为后端整合预留清晰边界',
-    description: 'phase1 先跑 mock data，phase2 再将 auth 与 records 平滑切换到 REST API。',
+    title: '前后端维持统一资料流',
+    description: '登录、地图记录、列表、详情与编辑都统一走真实 REST API 与 PostgreSQL。',
     icon: <ExploreOutlinedIcon />,
   },
 ];
@@ -56,15 +56,14 @@ export function HomePage() {
           <Grid item xs={12} md={7}>
             <Stack spacing={2.5}>
               <Stack direction="row" spacing={1} flexWrap="wrap">
-                <Chip label="Phase 1 Frontend Prototype" color="secondary" />
-                <Chip label="Google Maps + Mock Data" variant="outlined" color="primary" />
+                <Chip label="Google Maps + PostgreSQL" color="secondary" />
+                <Chip label="JWT Auth + REST API" variant="outlined" color="primary" />
               </Stack>
               <Typography variant="h1" sx={{ fontSize: { xs: '3.2rem', md: '5.4rem' }, maxWidth: 720 }}>
                 把路线、地形与徒步笔记收进同一张地图。
               </Typography>
               <Typography variant="h6" color="text.secondary" maxWidth={640} lineHeight={1.7}>
-                HikeLog Maps 是这份作业的前端原型版本。现在它已经具备首页、登录、地图规划、记录列表、详情与编辑流程，
-                先用 mock data 驱动，再逐步接上后端与权限控制。
+                HikeLog Maps 现在以真实后端运行。你可以注册账号、规划真实路线、建立记录，并在列表与详情页持续管理自己的徒步资料。
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                 <Button
@@ -84,7 +83,7 @@ export function HomePage() {
                   color="primary"
                   size="large"
                 >
-                  使用示例账号进入
+                  前往登录
                 </Button>
               </Stack>
             </Stack>
@@ -99,12 +98,12 @@ export function HomePage() {
                   </Stack>
                   <Stack spacing={1.4}>
                     <Typography color="text.secondary">1. 页面可操作，路由导览完整。</Typography>
-                    <Typography color="text.secondary">2. 地图可加载、规划路线、读取距离与时间。</Typography>
-                    <Typography color="text.secondary">3. mock 登录态与记录新增、列表、详情、编辑流程跑通。</Typography>
+                    <Typography color="text.secondary">2. 地图可加载、规划真实路线、读取距离与时间。</Typography>
+                    <Typography color="text.secondary">3. 登录与记录新增、列表、详情、编辑流程统一接入真实后端。</Typography>
                   </Stack>
                   <Divider />
                   <Typography variant="body2" color="text.secondary">
-                    推荐先用 `demo@hikelog.test / trail123` 登录，直接进入地图规划页体验整条路径。
+                    启动完成后可直接注册账号，再进入地图页建立第一条徒步路线。
                   </Typography>
                 </Stack>
               </CardContent>
@@ -121,7 +120,7 @@ export function HomePage() {
           <MetricCard label="Mode" value="真实地图" helper="Google Maps JavaScript API 与 Directions 接入完成" />
         </Grid>
         <Grid item xs={12} md={4}>
-          <MetricCard label="Flow" value="Mock Ready" helper="auth 与 records 先用本地存储驱动，后续可平滑接 API" />
+          <MetricCard label="Flow" value="Live API" helper="auth 与 records 统一走真实 backend 与 PostgreSQL" />
         </Grid>
       </Grid>
 
@@ -129,7 +128,7 @@ export function HomePage() {
         <SectionIntro
           eyebrow="Field Notes"
           title="这一版前端是怎么组织的"
-          description="页面层负责叙事与组合，地图加载、路线请求、鉴权状态和 mock 数据都拆到 hooks、context 与 services。这样后端接入时不需要重写页面。"
+          description="页面层负责叙事与组合，地图加载、路线请求、鉴权状态与记录 API 都拆到 hooks、context 与 services，保持单一真实资料流。"
         />
         <Grid container spacing={2.5}>
           {featureCards.map((card) => (

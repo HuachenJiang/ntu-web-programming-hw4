@@ -64,7 +64,7 @@ export function AppHeader({ showPrivateLinks = false }: AppHeaderProps) {
                 HikeLog Maps
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                徒步路线原型
+                徒步路线记录系统
               </Typography>
             </Box>
           </Stack>
@@ -109,10 +109,17 @@ export function AppHeader({ showPrivateLinks = false }: AppHeaderProps) {
                   {user?.name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Mock 登录态
+                  已登录
                 </Typography>
               </Box>
-              <Button variant="outlined" color="primary" onClick={logout} startIcon={<LogoutRoundedIcon />}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => {
+                  void logout();
+                }}
+                startIcon={<LogoutRoundedIcon />}
+              >
                 退出
               </Button>
             </Stack>

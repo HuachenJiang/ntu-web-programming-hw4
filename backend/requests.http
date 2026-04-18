@@ -1,0 +1,224 @@
+@baseUrl = http://localhost:3000
+@json = application/json
+
+### Health
+GET {{baseUrl}}/health
+
+### Register
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: {{json}}
+
+{
+  "name": "Phase2 Demo User",
+  "email": "phase2-demo@hikelog.test",
+  "password": "trail123"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: {{json}}
+
+{
+  "email": "phase2-demo@hikelog.test",
+  "password": "trail123"
+}
+
+@token = {{login.response.body.data.token}}
+@locationId = {{createLocation.response.body.data.id}}
+@eventId = {{createEvent.response.body.data.id}}
+@postId = {{createPost.response.body.data.id}}
+
+### Me
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Create Location
+# @name createLocation
+POST {{baseUrl}}/api/locations
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "name": "虎山亲山步道",
+  "description": "靠近福德街入口，适合作为路线终点。",
+  "address": "台北市信义区福德街 251 巷",
+  "latitude": 25.0318,
+  "longitude": 121.5849,
+  "category": "destination",
+  "placeId": "ChIJv8eN5m2rQjQR9X47DkVwS0k"
+}
+
+### List Locations
+GET {{baseUrl}}/api/locations?q=虎山&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### List Locations By Radius
+GET {{baseUrl}}/api/locations?lat=25.0318&lng=121.5849&radius=1000&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Get Location By Id
+GET {{baseUrl}}/api/locations/{{locationId}}
+Authorization: Bearer {{token}}
+
+### Update Location
+PATCH {{baseUrl}}/api/locations/{{locationId}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "description": "更新后的地点说明"
+}
+
+### Create Event
+# @name createEvent
+POST {{baseUrl}}/api/events
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "title": "晨雾里的象山到虎山穿越",
+  "description": "phase2 API 验收用的徒步记录。",
+  "category": "ridge",
+  "status": "completed",
+  "completedDate": "2026-04-18",
+  "notes": "前段阶梯密集，但视野很漂亮。",
+  "location": {
+    "name": "虎山亲山步道",
+    "description": "路线终点",
+    "address": "台北市信义区福德街 251 巷",
+    "latitude": 25.0318,
+    "longitude": 121.5849,
+    "category": "destination",
+    "placeId": "ChIJv8eN5m2rQjQR9X47DkVwS0k"
+  },
+  "routePlan": {
+    "origin": {
+      "label": "象山步道入口",
+      "address": "台北市信义区信义路五段 150 巷",
+      "lat": 25.0273,
+      "lng": 121.5709
+    },
+    "destination": {
+      "label": "虎山亲山步道",
+      "address": "台北市信义区福德街 251 巷",
+      "lat": 25.0318,
+      "lng": 121.5849
+    },
+    "waypoints": [],
+    "distanceKm": 5.8,
+    "durationMinutes": 112,
+    "overviewPolyline": ""
+  }
+}
+
+### List Events
+GET {{baseUrl}}/api/events?q=象山&category=ridge&from=2026-01-01&to=2026-12-31&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Get Event By Id
+GET {{baseUrl}}/api/events/{{eventId}}
+Authorization: Bearer {{token}}
+
+### Update Event
+PATCH {{baseUrl}}/api/events/{{eventId}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "notes": "已经更新这条徒步记录。",
+  "status": "planned"
+}
+
+### Create Post
+# @name createPost
+POST {{baseUrl}}/api/posts
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "title": "象山到虎山的逆光路线",
+  "description": "phase2 API 验收心得",
+  "content": "如果早一点出发，城市边缘的光线层次很好。",
+  "eventId": "{{eventId}}",
+  "completedDate": "2026-04-18"
+}
+
+### List Posts
+GET {{baseUrl}}/api/posts?q=逆光&from=2026-01-01&to=2026-12-31&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### Get Post By Id
+GET {{baseUrl}}/api/posts/{{postId}}
+Authorization: Bearer {{token}}
+
+### Update Post
+PATCH {{baseUrl}}/api/posts/{{postId}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "content": "更新后的心得内容。"
+}
+
+### Unauthorized Me
+GET {{baseUrl}}/auth/me
+
+### Invalid Login
+POST {{baseUrl}}/auth/login
+Content-Type: {{json}}
+
+{
+  "email": "phase2-demo@hikelog.test",
+  "password": "wrong-password"
+}
+
+### Validation Failure On Event
+POST {{baseUrl}}/api/events
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "title": "",
+  "category": "invalid-category",
+  "status": "completed",
+  "completedDate": "not-a-date",
+  "notes": "",
+  "location": {
+    "name": "坏资料",
+    "address": "坏资料",
+    "latitude": 999,
+    "longitude": 999,
+    "category": "destination"
+  },
+  "routePlan": {
+    "origin": {
+      "label": "A",
+      "address": "A",
+      "lat": 0,
+      "lng": 0
+    },
+    "destination": {
+      "label": "B",
+      "address": "B",
+      "lat": 0,
+      "lng": 0
+    },
+    "waypoints": [],
+    "distanceKm": 1,
+    "durationMinutes": 1
+  }
+}
+
+### Delete Post
+DELETE {{baseUrl}}/api/posts/{{postId}}
+Authorization: Bearer {{token}}
+
+### Delete Event
+DELETE {{baseUrl}}/api/events/{{eventId}}
+Authorization: Bearer {{token}}
+
+### Delete Location
+DELETE {{baseUrl}}/api/locations/{{locationId}}
+Authorization: Bearer {{token}}

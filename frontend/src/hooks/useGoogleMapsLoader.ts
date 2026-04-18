@@ -45,7 +45,7 @@ export function useGoogleMapsLoader() {
     if (!apiKey) {
       setState({
         isLoaded: false,
-        loadError: '尚未配置 VITE_GOOGLE_MAPS_API_KEY，地图已切换为降级模式。',
+        loadError: '尚未配置 VITE_GOOGLE_MAPS_API_KEY，地图功能目前不可用。',
         googleMaps: null,
       });
       return;
@@ -80,7 +80,7 @@ export function useGoogleMapsLoader() {
 
         setState({
           isLoaded: false,
-          loadError: '地图加载失败，请检查 API key 或网络状态。',
+          loadError: '地图加载失败，请检查 API key、网络状态或 referrer 限制。',
           googleMaps: null,
         });
       });
