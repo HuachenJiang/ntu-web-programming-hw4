@@ -12,7 +12,11 @@ class ApiClientError extends Error {
 
 function getBaseUrl() {
   const value = import.meta.env.VITE_API_BASE_URL?.trim();
-  return value || 'http://localhost:3000';
+  if (!value) {
+    throw new Error('VITE_API_BASE_URL 未配置，无法发送 API 请求。');
+  }
+
+  return value;
 }
 
 async function parseResponse<T>(response: Response): Promise<ApiResponse<T>> {

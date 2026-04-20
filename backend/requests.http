@@ -25,19 +25,14 @@ Content-Type: {{json}}
   "password": "trail123"
 }
 
-@token = {{login.response.body.data.token}}
-@locationId = {{createLocation.response.body.data.id}}
-@eventId = {{createEvent.response.body.data.id}}
-@postId = {{createPost.response.body.data.id}}
-
 ### Me
 GET {{baseUrl}}/auth/me
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Create Location
 # @name createLocation
 POST {{baseUrl}}/api/locations
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -52,19 +47,19 @@ Content-Type: {{json}}
 
 ### List Locations
 GET {{baseUrl}}/api/locations?q=虎山&page=1&limit=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### List Locations By Radius
 GET {{baseUrl}}/api/locations?lat=25.0318&lng=121.5849&radius=1000&page=1&limit=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Get Location By Id
-GET {{baseUrl}}/api/locations/{{locationId}}
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/locations/{{createLocation.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Update Location
-PATCH {{baseUrl}}/api/locations/{{locationId}}
-Authorization: Bearer {{token}}
+PATCH {{baseUrl}}/api/locations/{{createLocation.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -74,7 +69,7 @@ Content-Type: {{json}}
 ### Create Event
 # @name createEvent
 POST {{baseUrl}}/api/events
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -115,15 +110,15 @@ Content-Type: {{json}}
 
 ### List Events
 GET {{baseUrl}}/api/events?q=象山&category=ridge&from=2026-01-01&to=2026-12-31&page=1&limit=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Get Event By Id
-GET {{baseUrl}}/api/events/{{eventId}}
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/events/{{createEvent.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Update Event
-PATCH {{baseUrl}}/api/events/{{eventId}}
-Authorization: Bearer {{token}}
+PATCH {{baseUrl}}/api/events/{{createEvent.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -134,28 +129,28 @@ Content-Type: {{json}}
 ### Create Post
 # @name createPost
 POST {{baseUrl}}/api/posts
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
   "title": "象山到虎山的逆光路线",
   "description": "phase2 API 验收心得",
   "content": "如果早一点出发，城市边缘的光线层次很好。",
-  "eventId": "{{eventId}}",
+  "eventId": "{{createEvent.response.body.$.data.id}}",
   "completedDate": "2026-04-18"
 }
 
 ### List Posts
 GET {{baseUrl}}/api/posts?q=逆光&from=2026-01-01&to=2026-12-31&page=1&limit=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Get Post By Id
-GET {{baseUrl}}/api/posts/{{postId}}
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/posts/{{createPost.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Update Post
-PATCH {{baseUrl}}/api/posts/{{postId}}
-Authorization: Bearer {{token}}
+PATCH {{baseUrl}}/api/posts/{{createPost.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -176,7 +171,7 @@ Content-Type: {{json}}
 
 ### Validation Failure On Event
 POST {{baseUrl}}/api/events
-Authorization: Bearer {{token}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 Content-Type: {{json}}
 
 {
@@ -212,13 +207,13 @@ Content-Type: {{json}}
 }
 
 ### Delete Post
-DELETE {{baseUrl}}/api/posts/{{postId}}
-Authorization: Bearer {{token}}
+DELETE {{baseUrl}}/api/posts/{{createPost.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Delete Event
-DELETE {{baseUrl}}/api/events/{{eventId}}
-Authorization: Bearer {{token}}
+DELETE {{baseUrl}}/api/events/{{createEvent.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
 
 ### Delete Location
-DELETE {{baseUrl}}/api/locations/{{locationId}}
-Authorization: Bearer {{token}}
+DELETE {{baseUrl}}/api/locations/{{createLocation.response.body.$.data.id}}
+Authorization: Bearer {{login.response.body.$.data.token}}
