@@ -115,7 +115,7 @@ export function useRoutePlanner(googleMaps: typeof google | null) {
       ]);
 
       const routePlan: RoutePlan = {
-        ...routeResponse.data,
+        ...routeResponse.data.routePlan,
         origin: {
           label: originResult.data.name,
           address: originResult.data.address,
@@ -132,13 +132,7 @@ export function useRoutePlanner(googleMaps: typeof google | null) {
         },
       };
 
-      const directionsResult = await directionsServiceRef.current.route({
-        origin: { lat: routePlan.origin.lat, lng: routePlan.origin.lng },
-        destination: { lat: routePlan.destination.lat, lng: routePlan.destination.lng },
-        travelMode: googleMaps.maps.TravelMode.WALKING,
-      });
-
-      directionsRendererRef.current.setDirections(directionsResult);
+      directionsRendererRef.current.setDirections(routeResponse.data.directionsResult);
       await pinEndpoints(routePlan);
 
       setState({

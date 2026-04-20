@@ -5,12 +5,14 @@ import { Alert, Grid, Stack, Typography } from '@mui/material';
 import { startTransition, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapCanvas } from '../components/MapCanvas';
+import { MapMonitorPanel } from '../components/MapMonitorPanel';
 import { MapRoutePanel } from '../components/MapRoutePanel';
 import { MetricCard } from '../components/MetricCard';
 import { RecordEditorForm } from '../components/RecordEditorForm';
 import { SectionIntro } from '../components/SectionIntro';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleMapsLoader } from '../hooks/useGoogleMapsLoader';
+import { useMapMonitorSummary } from '../hooks/useMapMonitorSummary';
 import { useRoutePlanner } from '../hooks/useRoutePlanner';
 import { recordService } from '../services/recordService';
 import { createDefaultRecordDraft } from '../utils/recordDrafts';
@@ -26,6 +28,7 @@ export function MapPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { isLoaded, loadError, googleMaps } = useGoogleMapsLoader();
+  const monitorSummary = useMapMonitorSummary();
   const { mapElementRef, routePlan, routeError, isPlanning, planRoute } = useRoutePlanner(googleMaps);
   const mapBlocked = Boolean(loadError);
 
@@ -175,6 +178,7 @@ export function MapPage() {
                 </Typography>
               </Stack>
             </Stack>
+            <MapMonitorPanel summary={monitorSummary} />
           </Stack>
         </Grid>
       </Grid>

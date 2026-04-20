@@ -2,6 +2,11 @@ import type { ApiResponse } from '../types/api';
 import type { RoutePlan, RouteRequest, SearchLocationResult } from '../types/models';
 import { mapMonitorService } from './mapMonitorService';
 
+interface RoutePlanningResult {
+  routePlan: RoutePlan;
+  directionsResult: google.maps.DirectionsResult;
+}
+
 function extractLegSummary(result: google.maps.DirectionsResult, overviewPolyline?: string): RoutePlan {
   const route = result.routes[0];
   const leg = route.legs[0];
@@ -88,19 +93,19 @@ export const mapService = {
   async getWalkingRoute(
     directionsService: google.maps.DirectionsService,
     request: RouteRequest,
-  ): Promise<ApiResponse<RoutePlan>> {
+  ): Promise<ApiResponse<RoutePlanningResult>> {
     const startedAt = performance.now();
 
     try {
-      const result = await directionsService.route({
+      const directionsResult = await directionsService.route({
         origin: request.origin,
         destination: request.destination,
         travelMode: google.maps.TravelMode.WALKING,
       });
 
       const routePlan = extractLegSummary(
-        result,
-        result.routes[0]?.overview_polyline ?? undefined,
+        directionsResult,
+        directionsResult.routes[0]?.overview_polyline ?? undefined,
       );
 
       mapMonitorService.record({
@@ -112,7 +117,10 @@ export const mapService = {
       return {
         success: true,
         message: '路线规划成功',
-        data: routePlan,
+        data: {
+          routePlan,
+          directionsResult,
+        },
       };
     } catch (error) {
       mapMonitorService.record({

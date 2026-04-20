@@ -8,6 +8,7 @@
 
 - 用户注册、登录、登出与 JWT 身份验证
 - Google Maps 地图载入、地点解析与步行路线规划
+- Google Maps 请求监控，记录调用量、成功率、失败率、延迟与 quota 风险
 - 徒步记录的新增、查询、编辑
 - 统一的 RESTful API、验证、权限控制与 PostgreSQL 数据存储
 
@@ -54,6 +55,7 @@
 
 - 前端统一调用真实 backend API
 - 登录、地图规划、记录列表、详情与编辑全部走同一套真实资料流
+- 地图路线规划会复用单次 Directions 结果，同时用于画面渲染与 routePlan 摘要写入
 - `VITE_GOOGLE_MAPS_API_KEY` 为地图功能必需配置
 - 应用可打开，但若地图 key 缺失或地图服务失败，`/map` 页面不可操作且不能保存记录
 

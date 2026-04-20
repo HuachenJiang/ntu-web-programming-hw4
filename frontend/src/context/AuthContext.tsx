@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { authService } from '../services/authService';
+import { mapMonitorService } from '../services/mapMonitorService';
 import type { AuthContextValue } from '../types/auth';
 import type { User } from '../types/models';
 
@@ -13,6 +14,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setUser(nextUser);
     });
   }, []);
+
+  useEffect(() => {
+    mapMonitorService.setUserContext(user?.id ?? null);
+  }, [user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

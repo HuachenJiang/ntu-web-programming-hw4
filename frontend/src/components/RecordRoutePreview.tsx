@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Alert, Card, CardContent, Stack, Typography } from '@mui/material';
 import type { RoutePlan } from '../types/models';
 import { useGoogleMapsLoader } from '../hooks/useGoogleMapsLoader';
+import { mapService } from '../services/mapService';
 import { formatDistance, formatDuration } from '../utils/formatters';
 
 interface RecordRoutePreviewProps {
@@ -34,13 +35,12 @@ export function RecordRoutePreview({ routePlan }: RecordRoutePreviewProps) {
       },
     });
 
-    directionsService
-      .route({
+    mapService
+      .getWalkingRoute(directionsService, {
         origin: { lat: routePlan.origin.lat, lng: routePlan.origin.lng },
         destination: { lat: routePlan.destination.lat, lng: routePlan.destination.lng },
-        travelMode: google.maps.TravelMode.WALKING,
       })
-      .then((result: google.maps.DirectionsResult) => directionsRenderer.setDirections(result))
+      .then((result) => directionsRenderer.setDirections(result.data.directionsResult))
       .catch(() => {
         new googleMaps.maps.Marker({
           position: { lat: routePlan.origin.lat, lng: routePlan.origin.lng },

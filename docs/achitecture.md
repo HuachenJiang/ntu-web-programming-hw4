@@ -175,7 +175,8 @@ Google Maps 在本项目中只支持真实线上流程：
 
 - 浏览器端从 `frontend/.env` 读取 `VITE_GOOGLE_MAPS_API_KEY`
 - 使用 `Google Maps JavaScript API` 处理地图载入与互动
-- 使用 `Directions API` 规划步行路线
+- 使用 `Geocoder` 解析输入地点，并以 `Directions API` 规划步行路线
+- 单次路线规划只发出一次 Directions 请求，结果同时用于地图渲染与 routePlan 摘要
 - 地图页只有在成功取得真实 `routePlan` 时才允许保存记录
 
 统一规则如下：
@@ -183,6 +184,7 @@ Google Maps 在本项目中只支持真实线上流程：
 - 应用可以打开，但若 `VITE_GOOGLE_MAPS_API_KEY` 缺失，`/map` 页面不可操作
 - 若 Maps JavaScript API 加载失败，`/map` 页面不可操作
 - 若 Directions 请求失败，页面保留错误讯息，且不允许保存记录
+- 前端会在 session 内累计 Google Maps 请求监控指标，追踪 `dailyCount`、成功率、失败率、平均延迟与 `quotaRisk`
 
 ## 9. Data Flow
 

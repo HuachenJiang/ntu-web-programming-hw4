@@ -57,8 +57,8 @@ export interface RecordFilters {
 }
 
 export interface RouteRequest {
-  origin: string;
-  destination: string;
+  origin: string | google.maps.LatLngLiteral;
+  destination: string | google.maps.LatLngLiteral;
 }
 
 export interface SearchLocationResult {
