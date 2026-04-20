@@ -1,51 +1,37 @@
 # Project Achitecture
 
-本文档为本项目的架构主说明文件。`docs/` 文件夹专门用于存放项目文档，而本文件负责整理系统目标、模块分层、资料流、API 边界与开发阶段。Google Maps API 相关专门说明则放在同目录下的 [google-maps-setup.md](./google-maps-setup.md)。
+本文档记录本项目当前的真实架构、模块职责、资料流与运行约定。Google Maps 的开通与 key 管理说明统一维护在 [google-maps-setup.md](./google-maps-setup.md)。
 
 ## 1. System Overview
 
-本项目是一个结合 Google Maps 的徒步记录 App，使用者登录后可以：
+HikeLog Maps 是一个结合 Google Maps 的徒步记录 App，当前系统目标如下：
 
-- 在地图上搜寻地点与标记位置
-- 规划徒步路线并取得里程
-- 记录完成日期与心得
-- 管理自己的活动、地点、心得与其他项目资料
+- 使用者可注册、登录、登出，并以 `email + password` 进行身份验证
+- 登录后可建立、读取、编辑自己的徒步记录
+- 地图页使用 `Google Maps JavaScript API` 与 `Directions API` 规划真实路线
+- 后端以 `Express + Prisma + PostgreSQL` 提供 RESTful API、JWT、验证与权限控制
 
-系统分为三个主要层次：
+系统分为三层：
 
-- Frontend: `React + TypeScript + Vite + React Router + Axios + Material UI`
-- Backend: `Node.js + Express + TypeScript + RESTful API + JWT`
+- Frontend: `React + TypeScript + Vite + React Router + Material UI`
+- Backend: `Node.js + Express + TypeScript + Prisma + JWT`
 - Database: `PostgreSQL`
 
-Google Maps 整合以 `Google Maps JavaScript API` 为主，并以 `Directions API` 支援路线与距离计算。
-
-## 2. Documentation Structure
-
-建议文档结构如下：
-
-```text
-docs/
-  achitecture.md
-  google-maps-setup.md
-```
-
-职责如下：
-
-- `docs/achitecture.md`: 记录整体架构、模块职责、资料流、开发顺序
-- `docs/google-maps-setup.md`: 记录 Google Cloud、Billing、API 启用、API key 限制与整合说明
-
-第一阶段实际目录骨架建议同步建立为可运行的前端原型：
+## 2. Repository Structure
 
 ```text
 .
-├── .gitignore
+├── AGENTS.md
+├── README.md
 ├── docs/
+│   ├── achitecture.md
+│   └── google-maps-setup.md
 ├── frontend/
 │   ├── .env
 │   ├── .env.example
+│   ├── package.json
 │   └── src/
 │       ├── app/
-│       ├── assets/
 │       ├── components/
 │       ├── context/
 │       ├── hooks/
@@ -55,200 +41,108 @@ docs/
 │       ├── services/
 │       ├── types/
 │       └── utils/
-└── backend/
-    ├── .env
-    ├── .env.example
-    └── src/
-        ├── config/
-        ├── controllers/
-        ├── middlewares/
-        ├── repositories/
-        ├── routes/
-        ├── services/
-        ├── types/
-        ├── utils/
-        └── validators/
+├── backend/
+│   ├── .env
+│   ├── .env.example
+│   ├── package.json
+│   ├── prisma/
+│   └── src/
+│       ├── config/
+│       ├── controllers/
+│       ├── middlewares/
+│       ├── repositories/
+│       ├── routes/
+│       ├── services/
+│       ├── types/
+│       ├── utils/
+│       └── validators/
+└── start_all_server.sh
 ```
 
 ## 3. Frontend Architecture
 
-前端负责页面呈现、地图互动、表单输入、认证状态与 API 串接。phase1 先完成前端可运行原型，不接真实后端，所有业务流程先通过 mock service 与本地存储驱动。
+前端负责页面呈现、地图互动、表单输入、认证状态与 API 串接。当前运行模式只有一套：页面统一调用真实 backend API，登录、地图规划与记录管理全部走同一套真实资料流。
 
-建议目录：
+模块职责如下：
 
-```text
-frontend/
-  .env
-  .env.example
-  src/
-    app/
-    components/
-    context/
-    hooks/
-    layouts/
-    pages/
-    routes/
-    services/
-    types/
-    utils/
-```
-
-模块职责：
-
-- `pages/`: 页面级流程，例如首页、登录页、地图页、记录页
-- `components/`: 可复用 UI 元件，例如地图容器、路线表单、记录卡片
-- `hooks/`: 封装地图载入、Directions 调用、表单行为、认证状态
-- `context/`: 管理全域状态，例如当前用户、token
-- `services/`: Axios 实例与 API 封装
-- `types/`: 前后端 DTO 与 domain model
-- `utils/`: 日期、距离、地图资料转换等工具函数
-
-phase1 额外要求：
-
-- 建立 `Vite + React + TypeScript` 可运行工程与测试环境
-- 使用 `Material UI` 作为组件基础，但通过自订主题与视觉样式实现户外杂志风
-- `AuthContext` 先以 mock 用户和本地存储维持登录态
-- 路由保护集中在 `routes/`，页面不自行处理鉴权跳转
-- 地图脚本加载、Directions 请求与错误状态集中在 `hooks/` 或 `services/`
-- 页面组件只组合 UI、调用 hooks 与服务，不直接塞入复杂地图初始化逻辑
-- 记录新增与编辑只写入前端 mock data，后续才通过 Axios 串接后端
-
-phase1 页面与流程范围：
-
-- `/`: 首页与主要 CTA
-- `/login`: 登录页
-- `/register`: 注册页
-- `/map`: 地图规划与记录建立页
-- `/records`: 记录列表页
-- `/records/:id`: 记录详情页
-- `/records/:id/edit`: 记录编辑页
-
-phase1 路由规则：
-
-- `/map`、`/records`、`/records/:id`、`/records/:id/edit` 需要 mock 登录态
-- 未登录时统一跳转 `/login`
-- 已登录时访问 `/login` 或 `/register` 时导向 `/map`
+- `pages/`: 页面级流程，例如首页、登录页、地图页、记录列表、详情与编辑页
+- `components/`: 可复用 UI 元件，例如导航、地图容器、路线面板、记录表单
+- `hooks/`: 封装地图加载、路线规划与筛选等可复用行为
+- `context/`: 维护全域认证状态与登录恢复逻辑
+- `services/`: API 请求封装与本地 auth storage
+- `types/`: 前端 domain model、API response 与 DTO 型别
+- `utils/`: 日期、距离、表单与常数工具
 
 前端原则：
 
-- 页面层不直接塞入复杂地图逻辑
-- API 调用集中在 `services/`
-- 共用状态集中在 `context/`
-- 可复用行为集中在 `hooks/`
-- Google Maps browser key 统一从 `frontend/.env` 读取，不写死在源码
+- 页面组件不直接写复杂请求逻辑
+- 认证与记录资料统一经由 `services/` 调用 backend
+- 地图功能只支持真实 Google Maps 流程
+- 若缺少 `VITE_GOOGLE_MAPS_API_KEY` 或地图服务失败，`/map` 页面直接进入不可操作状态，不允许保存记录
 
 ## 4. Backend Architecture
 
 后端负责认证、权限、验证、业务逻辑、数据库存取与错误处理。
 
-建议目录：
+模块职责如下：
 
-```text
-backend/
-  .env
-  .env.example
-  src/
-    app.ts
-    server.ts
-    config/
-    controllers/
-    middlewares/
-    repositories/
-    routes/
-    services/
-    types/
-    validators/
-    utils/
-```
-
-模块职责：
-
-- `routes/`: 路由定义
-- `controllers/`: request / response handling
-- `services/`: 业务逻辑与规则
-- `repositories/`: PostgreSQL 读写
-- `validators/`: 栏位与 schema 验证
-- `middlewares/`: JWT 验证、权限检查、错误处理、日志
+- `routes/`: URL 与 middleware 组合
+- `controllers/`: request / response 转换与统一 JSON 回传
+- `services/`: 业务逻辑、owner 检查与跨资源规则
+- `repositories/`: Prisma 查询与写入封装
+- `validators/`: Zod schema、params 与 query 验证
+- `middlewares/`: JWT 验证、404 与 error handling
+- `config/`: 环境变量与 Prisma client
 
 后端原则：
 
-- 路由只负责转发，不直接写复杂业务逻辑
-- 权限检查必须独立且可复用
-- 资料库存取与业务逻辑分离
-- 统一响应格式与错误码
-- 所有 secret、数据库连线与 server-side Google key 统一从 `backend/.env` 读取
+- 路由只负责转发，不直接承载业务逻辑
+- 写入型操作必须经过认证与 owner 权限验证
+- 成功与错误响应格式统一
+- 所有 secret、数据库连线与 server-side key 都来自 `.env`
 
 ## 5. Domain Model
 
-建议核心资源如下：
+核心资源如下：
 
-- `users`: 用户
-- `events`: 徒步活动或路线记录
-- `locations`: 地点资料
-- `posts`: 心得或游记
-- `items`: 装备、清单或其他附属项目
+- `users`
+- `locations`
+- `events`
+- `posts`
 
-共通栏位建议：
+关键建模约定：
 
-- `id`
-- `ownerId`
-- `createdAt`
-- `updatedAt`
-
-常见业务栏位：
-
-- `title` / `name`
-- `description`
-- `latitude`
-- `longitude`
-- `address`
-- `category`
-- `startTime`
-- `endTime`
-- `completedDate`
+- 所有业务资源保留 `ownerId`
+- `events` 以 `locationId` 关联 `locations`
+- `events.routePlan` 以 JSON 保存起点、终点、途经点、里程与时间
+- API 回传 `event` 时展开包含 `location`，以贴近前端 `HikeRecord`
+- `users.email` 为唯一值
 
 ## 6. API Architecture
 
-认证相关：
+认证路由：
 
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /auth/logout`
 - `GET /auth/me`
 
-资源相关：
+资源路由：
 
 - `/api/events`
 - `/api/locations`
 - `/api/posts`
-- `/api/items`
 
-设计原则：
+设计约定：
 
 - 使用 RESTful 风格
-- 列表查询优先支援 `q`, `category`, `radius`, `lat`, `lng`, `from`, `to`
-- 成功与错误响应格式统一
-- 写入型 API 必须经过认证与 owner 权限验证
+- 列表查询优先支援 `q`, `category`, `radius`, `lat`, `lng`, `from`, `to`, `page`, `limit`
+- Auth 成功响应固定为 `data: { user, token }`
+- 写入型 API 必须经过 JWT 与 owner 权限验证
 
-## 7. Auth and Security
+## 7. Runtime and Environment
 
-安全要求：
-
-- 账号使用 `email + password`
-- 密码使用 `bcrypt` 或 `argon2` 哈希
-- 登录后由后端签发 JWT
-- 用户只能修改或删除自己的资料
-- `.env` 不提交，`.env.example` 必提交
-
-验证重点：
-
-- email 格式
-- password 长度
-- 经纬度数值范围
-- 日期与时间格式
-- 必填栏位检查
-
-环境变量骨架建议：
+环境变量如下：
 
 ### Frontend
 
@@ -261,90 +155,54 @@ VITE_API_BASE_URL=http://localhost:3000
 
 ```dotenv
 PORT=3000
-DATABASE_URL=
+DATABASE_URL=postgresql://<system-user>@localhost:5432/hikelog_maps?schema=public
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
 CORS_ORIGINS=http://localhost:4321,http://127.0.0.1:4321
 GOOGLE_MAPS_API_KEY=
 ```
 
-规则：
+运行约定：
 
-- `.env` 仅供本机开发使用，不提交
-- `.env.example` 必须存在并与 `.env` 的变量名称保持同步
-- 前端使用 `VITE_GOOGLE_MAPS_API_KEY`
-- 后端预留 `GOOGLE_MAPS_API_KEY` 给未来 server-to-server 调用
+- 项目日常启动唯一入口是根目录的 `./start_all_server.sh`
+- 本机需先安装 `postgresql@16`
+- 脚本负责启动 PostgreSQL 服务、建库、Prisma generate、migration、backend 与 frontend
+- 不再保留“backend 缺失时跳过启动”的兼容行为
 
-## 8. Google Maps Integration
+## 8. Google Maps Policy
 
-Google Maps 在本项目中的角色如下：
-
-- `Maps JavaScript API`: 地图显示与互动
-- `Directions API`: 徒步路线与里程计算
-- `Places API`: 可选，用于地点搜寻
-- `Geocoding API`: 可选，用于地址转换
-
-phase1 前端整合策略：
+Google Maps 在本项目中只支持真实线上流程：
 
 - 浏览器端从 `frontend/.env` 读取 `VITE_GOOGLE_MAPS_API_KEY`
-- 使用独立 loader hook 避免脚本重复载入
-- 地图页提供起点、终点、路线摘要与记录表单
-- 若 key 缺失、API 加载失败或 Directions 失败，页面仍保留可操作的降级流程与错误提示
-- 预留 request monitor 的前端埋点接口，但 phase1 不接真实监控后台
+- 使用 `Google Maps JavaScript API` 处理地图载入与互动
+- 使用 `Directions API` 规划步行路线
+- 地图页只有在成功取得真实 `routePlan` 时才允许保存记录
 
-建议资料流：
+统一规则如下：
 
-1. 用户进入地图页。
-2. 前端加载 Google Maps JavaScript API。
-3. 用户选择起点、终点或搜寻地点。
-4. 前端调用 Directions 取得步行路线与距离。
-5. 用户填写标题、日期、心得等表单。
-6. 前端通过 Axios 将资料写入后端。
-7. 后端完成验证、权限检查并保存到 PostgreSQL。
+- 应用可以打开，但若 `VITE_GOOGLE_MAPS_API_KEY` 缺失，`/map` 页面不可操作
+- 若 Maps JavaScript API 加载失败，`/map` 页面不可操作
+- 若 Directions 请求失败，页面保留错误讯息，且不允许保存记录
 
-Google Maps API 的开通、Billing、API key 限制与监控细节，统一维护于：
+## 9. Data Flow
 
-- [google-maps-setup.md](./google-maps-setup.md)
+主要资料流如下：
 
-## 9. Monitoring Architecture
+1. 使用者在前端注册或登录
+2. 前端取得 `token` 后写入本地 auth storage
+3. 前端访问 `/auth/me` 恢复登录态
+4. 地图页调用 Google Maps 生成真实路线摘要
+5. 前端将记录表单与 `routePlan` 提交到 `/api/events`
+6. 后端完成验证、权限检查与资料写入
+7. 记录列表、详情与编辑页统一从 backend 读取或更新资料
 
-Google Maps request monitors 建议分为两层：
+## 10. Change Rule
 
-- 前端：记录地图加载、路线计算、地点搜寻的成功与失败
-- 后端：记录与 Google 服务相关的代理请求、错误码、响应时间与统计
-
-建议追踪：
-
-- 服务名称
-- 请求时间
-- 用户 ID
-- 成功或失败
-- 响应时间
-- 错误码
-- 每日请求量
-- quota 风险
-
-## 10. Development Phases
-
-### Phase 1
-
-先完成前端页面与 mock data，确认地图页、记录页、登录页与路由导览正确。
-
-### Phase 2
-
-实现后端、数据库、Auth、验证、权限控制，并以 `curl` 或 `.http` 验证 API。
-
-### Phase 3
-
-用 Axios 将前端接上后端，完成从登录、地图操作到资料保存的完整流程。
-
-## 11. Architecture Change Rule
-
-若未来发生以下变动，必须优先更新本文件：
+以下变动必须先更新本文件再改代码：
 
 - 模块分层调整
-- 新增或删除核心资源
-- 认证方案改变
-- Google Maps 整合策略改变
-- API 命名或响应结构调整
-- 开发阶段与职责分工调整
+- 核心资源增减
+- API 响应契约改变
+- 认证策略改变
+- Google Maps 行为改变
+- 启动流程或环境变量策略改变

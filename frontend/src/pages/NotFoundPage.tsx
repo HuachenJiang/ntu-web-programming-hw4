@@ -14,7 +14,7 @@ export function NotFoundPage() {
       <HikingRoundedIcon color="secondary" sx={{ fontSize: 56 }} />
       <Typography variant="h2">这条路径暂时不存在</Typography>
       <Typography color="text.secondary" maxWidth={520}>
-        你可以回到首页重新进入地图或记录页。phase1 的可用页面已经全部放在顶部导航里。
+        你可以回到首页重新进入地图页或记录页，继续管理自己的徒步资料。
       </Typography>
       <Button component={RouterLink} to="/" variant="contained" color="secondary">
         返回首页

@@ -1,7 +1,6 @@
 export const storageKeys = {
   authUser: 'hikelog.auth.user',
-  users: 'hikelog.mock.users',
-  records: 'hikelog.mock.records',
+  authToken: 'hikelog.auth.token',
 };
 
 export function readStorage<T>(key: string, fallback: T): T {
@@ -27,4 +26,12 @@ export function writeStorage<T>(key: string, value: T) {
   }
 
   window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function removeStorage(key: string) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(key);
 }

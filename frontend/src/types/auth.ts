@@ -1,4 +1,5 @@
 import type { User } from './models';
+import type { ApiResponse } from './api';
 
 export interface AuthCredentials {
   email: string;
@@ -14,5 +15,12 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   login: (payload: AuthCredentials) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
+
+export interface AuthSuccessData {
+  user: User;
+  token: string;
+}
+
+export type AuthSuccessResponse = ApiResponse<AuthSuccessData>;

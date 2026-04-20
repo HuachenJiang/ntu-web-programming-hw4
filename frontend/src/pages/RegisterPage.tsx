@@ -46,8 +46,7 @@ export function RegisterPage() {
           </Typography>
           <Typography variant="h2">先建立自己的徒步档案，再进入地图记录第一条路线。</Typography>
           <Typography color="text.secondary" lineHeight={1.8}>
-            这个注册流程目前写入本地 mock storage，用来验证 auth context、路由保护和表单校验。
-            后续只需要把 service 层切换到真实 API，就能保留页面与状态结构。
+            注册成功后会立即取得登录状态，并统一通过真实后端保存使用者与记录资料。
           </Typography>
           <Box
             sx={{
@@ -61,7 +60,7 @@ export function RegisterPage() {
               <PersonAddAlt1RoundedIcon color="secondary" />
               <div>
                 <Typography fontWeight={700}>本阶段目标</Typography>
-                <Typography color="text.secondary">优先确保页面与 mock 流程顺畅，不在此阶段接后端。</Typography>
+                <Typography color="text.secondary">建立账号后直接进入地图页，开始你的真实路线记录流程。</Typography>
               </div>
             </Stack>
           </Box>

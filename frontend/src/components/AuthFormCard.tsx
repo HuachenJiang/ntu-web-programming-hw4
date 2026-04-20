@@ -32,9 +32,7 @@ export function AuthFormCard({
             </Typography>
             <Typography variant="h3">{isRegister ? '建立你的徒步基地' : '继续你的路线采集'}</Typography>
             <Typography color="text.secondary">
-              {isRegister
-                ? '先用 mock 账号流程把页面跑通，后续再无缝切换到后端 JWT。'
-                : '支持示例账号登录：demo@hikelog.test / trail123'}
+              {isRegister ? '注册后会直接进入地图页，并使用真实后端保存登录状态。' : '登录后可直接进入地图页建立与管理你的徒步记录。'}
             </Typography>
           </Stack>
 

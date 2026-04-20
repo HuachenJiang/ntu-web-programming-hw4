@@ -26,8 +26,8 @@ export function MapPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { isLoaded, loadError, googleMaps } = useGoogleMapsLoader();
-  const { mapElementRef, routePlan, routeError, isPlanning, planRoute, applyDemoRoute } =
-    useRoutePlanner(googleMaps);
+  const { mapElementRef, routePlan, routeError, isPlanning, planRoute } = useRoutePlanner(googleMaps);
+  const mapBlocked = Boolean(loadError);
 
   async function handleSaveRecord() {
     const nextErrors = validateRecordDraft(draft);
@@ -35,6 +35,11 @@ export function MapPage() {
     setSubmitError(null);
 
     if (Object.keys(nextErrors).length) {
+      return;
+    }
+
+    if (mapBlocked) {
+      setSubmitError(loadError);
       return;
     }
 
@@ -46,7 +51,7 @@ export function MapPage() {
     setIsSaving(true);
 
     try {
-      const response = await recordService.createRecord(draft, routePlan, user);
+      const response = await recordService.createRecord(draft, routePlan);
       setDraft(createDefaultRecordDraft());
       startTransition(() => {
         navigate(`/records/${response.data.id}`);
@@ -63,7 +68,7 @@ export function MapPage() {
       <SectionIntro
         eyebrow="Trail Studio"
         title="先在地图上定路线，再把这次徒步写成一条清晰记录。"
-        description="这个页面同时承担 phase1 的真实地图交互与 mock 数据写入。地图可正常加载时会走 Google Directions；如果 key 缺失，你仍可以用示例路线完成验收流程。"
+        description="地图页只支持真实 Google Maps 路线规划。只有成功取得真实路线摘要后，系统才允许建立徒步记录。"
       />
 
       <Grid container spacing={2.5}>
@@ -71,10 +76,10 @@ export function MapPage() {
           <MetricCard label="Planner" value="Walking" helper="Directions API 步行模式，读取距离与预计时间" />
         </Grid>
         <Grid item xs={12} md={4}>
-          <MetricCard label="Save Mode" value="Mock Records" helper="保存到本地记录服务，为后续 Axios 接口预留边界" />
+          <MetricCard label="Save Mode" value="Live Events" helper="保存到真实 backend，并写入 PostgreSQL 资料库" />
         </Grid>
         <Grid item xs={12} md={4}>
-          <MetricCard label="Fallback" value="Degraded OK" helper="地图失败时仍可继续示例路线与表单流程" />
+          <MetricCard label="Policy" value="Real Maps Only" helper="地图配置或服务异常时，页面不可保存记录" />
         </Grid>
       </Grid>
 
@@ -83,8 +88,8 @@ export function MapPage() {
           <Stack spacing={2.5}>
             <MapCanvas
               mapElementRef={mapElementRef}
-              fallbackTitle="地图暂时进入降级模式"
-              fallbackDescription="你仍可以使用示例路线、填写记录表单，并完整检查页面流程与导航行为。"
+              blockedTitle="地图功能当前不可用"
+              blockedDescription={loadError ?? '地图尚未完成载入。'}
               isLoaded={isLoaded}
             />
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
@@ -108,7 +113,6 @@ export function MapPage() {
             onOriginChange={setOrigin}
             onDestinationChange={setDestination}
             onPlanRoute={() => planRoute(origin, destination)}
-            onUseDemoRoute={applyDemoRoute}
             routePlan={routePlan}
             routeError={routeError}
             loadError={loadError}
@@ -124,6 +128,7 @@ export function MapPage() {
             errors={draftErrors}
             submitLabel="保存为我的徒步记录"
             isSubmitting={isSaving}
+            isDisabled={mapBlocked || Boolean(routeError)}
             onChange={(field, value) => setDraft((previous) => ({ ...previous, [field]: value }))}
             onSubmit={handleSaveRecord}
           />
@@ -160,7 +165,7 @@ export function MapPage() {
               <Stack direction="row" spacing={1.2} alignItems="center">
                 <BookmarkAddedRoundedIcon color="secondary" />
                 <Typography color="text.secondary">
-                  记录保存后会写入本地 mock data，并在列表页可见。
+                  记录保存后会写入真实 backend，并同步出现在记录列表页。
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={1.2} alignItems="center">

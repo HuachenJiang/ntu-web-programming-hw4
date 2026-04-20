@@ -70,16 +70,14 @@ export function RecordRoutePreview({ routePlan }: RecordRoutePreviewProps) {
               {formatDistance(routePlan.distanceKm)} · {formatDuration(routePlan.durationMinutes)}
             </Typography>
           </Stack>
-          {loadError && <Alert severity="warning">{loadError}</Alert>}
+          {loadError && <Alert severity="error">{loadError}</Alert>}
           {isLoaded ? (
             <div ref={mapRef} className="map-surface" />
           ) : (
-            <div className="map-fallback">
+            <div className="map-blocked">
               <Stack spacing={1.2} textAlign="center" maxWidth={380}>
                 <Typography variant="h5">地图预览暂时不可用</Typography>
-                <Typography color="text.secondary">
-                  当前仍可查看路线距离、时长与地点摘要，页面主流程不会受影响。
-                </Typography>
+                <Typography color="text.secondary">请检查 Google Maps API key、网络状态或地图服务限制。</Typography>
               </Stack>
             </div>
           )}

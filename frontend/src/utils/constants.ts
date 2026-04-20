@@ -20,8 +20,3 @@ export const appPaths = {
   map: '/map',
   records: '/records',
 };
-
-export const demoRouteRequest = {
-  origin: '台北市象山步道',
-  destination: '台北市虎山亲山步道',
-};

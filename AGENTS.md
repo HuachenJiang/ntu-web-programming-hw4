@@ -30,7 +30,7 @@
 
 - 用户可登录后记录徒步路线、里程、完成日期与心得
 - 地图需支援载入、缩放、拖拽、搜寻地点与地点标记
-- 以 RESTful API 维护 `auth`、`events`、`locations`、`posts`、`items`
+- 以 RESTful API 维护 `auth`、`events`、`locations`、`posts`
 - 强制实施身份验证、密码哈希、权限控制与输入验证
 
 ## 3. Architecture Principles
@@ -87,7 +87,6 @@
 - `/api/events`
 - `/api/locations`
 - `/api/posts`
-- `/api/items`
 
 ### 4.2 Response Contract
 

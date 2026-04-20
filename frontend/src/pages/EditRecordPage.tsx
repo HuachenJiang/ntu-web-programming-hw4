@@ -74,7 +74,7 @@ export function EditRecordPage() {
       <SectionIntro
         eyebrow="Edit Record"
         title="调整这条路线的标题、分类和心得"
-        description="编辑页沿用 phase1 的 mock data 模式，但已经具备完整的读取与回写流程。"
+        description="编辑页会读取真实后端资料，并将修改结果直接回写到同一笔徒步记录。"
       />
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>

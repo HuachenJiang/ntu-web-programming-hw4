@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { authService } from '../services/authService';
 import type { AuthContextValue } from '../types/auth';
 import type { User } from '../types/models';
@@ -7,6 +7,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
+
+  useEffect(() => {
+    authService.restoreSession().then((nextUser) => {
+      setUser(nextUser);
+    });
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -20,8 +26,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const response = await authService.register(payload);
         setUser(response.data);
       },
-      logout() {
-        authService.logout();
+      async logout() {
+        await authService.logout();
         setUser(null);
       },
     }),

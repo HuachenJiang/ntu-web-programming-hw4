@@ -8,24 +8,6 @@ interface RoutePlannerState {
   isPlanning: boolean;
 }
 
-const demoRoutePlan: RoutePlan = {
-  origin: {
-    label: '象山步道入口',
-    address: '台北市信义区信义路五段 150 巷',
-    lat: 25.0273,
-    lng: 121.5709,
-  },
-  destination: {
-    label: '虎山亲山步道',
-    address: '台北市信义区福德街 251 巷',
-    lat: 25.0318,
-    lng: 121.5849,
-  },
-  waypoints: [],
-  distanceKm: 5.8,
-  durationMinutes: 112,
-};
-
 export function useRoutePlanner(googleMaps: typeof google | null) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -173,29 +155,11 @@ export function useRoutePlanner(googleMaps: typeof google | null) {
     }
   }
 
-  function applyDemoRoute() {
-    setState({
-      routePlan: demoRoutePlan,
-      routeError: null,
-      isPlanning: false,
-    });
-
-    if (!googleMaps || !mapRef.current) {
-      return;
-    }
-
-    clearMarkers();
-    mapRef.current.setCenter({ lat: demoRoutePlan.destination.lat, lng: demoRoutePlan.destination.lng });
-    mapRef.current.setZoom(13);
-    pinEndpoints(demoRoutePlan).catch(() => undefined);
-  }
-
   return {
     mapElementRef,
     routePlan: state.routePlan,
     routeError: state.routeError,
     isPlanning: state.isPlanning,
     planRoute,
-    applyDemoRoute,
   };
 }

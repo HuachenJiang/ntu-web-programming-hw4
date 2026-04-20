@@ -1,13 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { vi } from 'vitest';
 import { AuthProvider } from '../context/AuthContext';
-import { storageKeys, writeStorage } from '../services/storage';
 import { LoginPage } from './LoginPage';
 
 describe('LoginPage', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    vi.restoreAllMocks();
   });
 
   it('shows validation errors when required fields are missing', async () => {
@@ -29,16 +30,26 @@ describe('LoginPage', () => {
     expect(await screen.findByText('请输入密码')).toBeInTheDocument();
   });
 
-  it('logs in with demo credentials and navigates to the map page', async () => {
+  it('logs in with backend credentials and navigates to the map page', async () => {
     const user = userEvent.setup();
-    writeStorage(storageKeys.users, [
-      {
-        id: 'user-demo-lin',
-        name: '林向野',
-        email: 'demo@hikelog.test',
-        password: 'trail123',
-      },
-    ]);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          message: '登录成功',
+          data: {
+            user: {
+              id: 'user-real-lin',
+              name: '林向野',
+              email: 'lin@example.com',
+            },
+            token: 'token-value',
+          },
+        }),
+      }),
+    );
 
     render(
       <AuthProvider>
@@ -51,7 +62,7 @@ describe('LoginPage', () => {
       </AuthProvider>,
     );
 
-    await user.type(screen.getByLabelText('邮箱'), 'demo@hikelog.test');
+    await user.type(screen.getByLabelText('邮箱'), 'lin@example.com');
     await user.type(screen.getByLabelText('密码'), 'trail123');
     await user.click(screen.getByRole('button', { name: '进入地图规划' }));
 
