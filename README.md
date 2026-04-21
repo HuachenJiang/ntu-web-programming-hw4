@@ -17,6 +17,7 @@
 | Layer | Technology |
 | --- | --- |
 | Frontend | React + TypeScript + Vite |
+| Frontend HTTP Client | Axios |
 | Frontend Routing | React Router |
 | UI Framework | Material UI |
 | Map SDK | Google Maps JavaScript API |
@@ -54,6 +55,7 @@
 项目只保留一套运行模式：
 
 - 前端统一调用真实 backend API
+- 前端所有 HTTP 请求统一经由 Axios client，集中处理 `baseURL`、JWT header 与错误响应
 - 登录、地图规划、记录列表、详情与编辑全部走同一套真实资料流
 - 地图路线规划会复用单次 Directions 结果，同时用于画面渲染与 routePlan 摘要写入
 - `VITE_GOOGLE_MAPS_API_KEY` 为地图功能必需配置

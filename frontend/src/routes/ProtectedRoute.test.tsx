@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from '../context/AuthContext';
+import { apiClient } from '../services/apiClient';
 import { storageKeys } from '../services/storage';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -29,21 +30,15 @@ describe('ProtectedRoute', () => {
   });
 
   it('renders children when user is authenticated', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          success: true,
-          message: '当前用户资料读取成功',
-          data: {
-            id: 'user-real-lin',
-            name: '林向野',
-            email: 'lin@example.com',
-          },
-        }),
-      }),
-    );
+    vi.spyOn(apiClient, 'request').mockResolvedValue({
+      success: true,
+      message: '当前用户资料读取成功',
+      data: {
+        id: 'user-real-lin',
+        name: '林向野',
+        email: 'lin@example.com',
+      },
+    });
 
     window.localStorage.setItem(storageKeys.authToken, JSON.stringify('token-value'));
     window.localStorage.setItem(

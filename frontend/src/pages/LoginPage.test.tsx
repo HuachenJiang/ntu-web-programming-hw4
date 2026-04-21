@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from '../context/AuthContext';
+import { apiClient } from '../services/apiClient';
 import { LoginPage } from './LoginPage';
 
 describe('LoginPage', () => {
@@ -32,24 +33,18 @@ describe('LoginPage', () => {
 
   it('logs in with backend credentials and navigates to the map page', async () => {
     const user = userEvent.setup();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          success: true,
-          message: '登录成功',
-          data: {
-            user: {
-              id: 'user-real-lin',
-              name: '林向野',
-              email: 'lin@example.com',
-            },
-            token: 'token-value',
-          },
-        }),
-      }),
-    );
+    vi.spyOn(apiClient, 'request').mockResolvedValue({
+      success: true,
+      message: '登录成功',
+      data: {
+        user: {
+          id: 'user-real-lin',
+          name: '林向野',
+          email: 'lin@example.com',
+        },
+        token: 'token-value',
+      },
+    });
 
     render(
       <AuthProvider>

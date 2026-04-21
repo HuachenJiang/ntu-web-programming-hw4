@@ -41,11 +41,7 @@ export const authService = {
     }
 
     try {
-      const response = await apiClient.request<User>('/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiClient.request<User>('/auth/me');
 
       writeStorage(storageKeys.authUser, response.data);
       return response.data;
@@ -58,7 +54,7 @@ export const authService = {
   async login(payload: AuthCredentials): Promise<ApiResponse<User>> {
     const response = await apiClient.request<AuthSuccessData>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      data: payload,
     });
 
     persistAuth(response.data);
@@ -73,7 +69,7 @@ export const authService = {
   async register(payload: RegisterPayload): Promise<ApiResponse<User>> {
     const response = await apiClient.request<AuthSuccessData>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      data: payload,
     });
 
     persistAuth(response.data);
@@ -92,9 +88,6 @@ export const authService = {
       if (token) {
         await apiClient.request<null>('/auth/logout', {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         });
       }
     } finally {

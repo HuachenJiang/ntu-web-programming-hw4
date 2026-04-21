@@ -1,19 +1,6 @@
 import type { ApiResponse } from '../types/api';
 import type { HikeRecord, RecordDraft, RecordFilters, RoutePlan } from '../types/models';
 import { apiClient } from './apiClient';
-import { authService } from './authService';
-
-function getAuthHeader() {
-  const token = authService.getToken();
-
-  if (!token) {
-    throw new Error('目前尚未登录，请重新登录后再试');
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
 
 function normalizeEventPayload(draft: RecordDraft, routePlan: RoutePlan) {
   return {
@@ -55,33 +42,26 @@ export const recordService = {
 
     const response = await apiClient.request<HikeRecord[]>(
       `/api/events${query.toString() ? `?${query}` : ''}`,
-      {
-        headers: getAuthHeader(),
-      },
     );
 
     return response;
   },
 
   async getRecordById(id: string): Promise<ApiResponse<HikeRecord>> {
-    return apiClient.request<HikeRecord>(`/api/events/${id}`, {
-      headers: getAuthHeader(),
-    });
+    return apiClient.request<HikeRecord>(`/api/events/${id}`);
   },
 
   async createRecord(draft: RecordDraft, routePlan: RoutePlan): Promise<ApiResponse<HikeRecord>> {
     return apiClient.request<HikeRecord>('/api/events', {
       method: 'POST',
-      headers: getAuthHeader(),
-      body: JSON.stringify(normalizeEventPayload(draft, routePlan)),
+      data: normalizeEventPayload(draft, routePlan),
     });
   },
 
   async updateRecord(id: string, draft: RecordDraft): Promise<ApiResponse<HikeRecord>> {
     return apiClient.request<HikeRecord>(`/api/events/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeader(),
-      body: JSON.stringify(draft),
+      data: draft,
     });
   },
 };
